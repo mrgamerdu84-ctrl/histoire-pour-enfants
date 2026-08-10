@@ -9,39 +9,34 @@ const AudioCtx = () => window.AudioContext || window.webkitAudioContext;
 
 const PRESETS = {
   magic: {
-    label: "Magique",
-    pad: [261.63, 329.63, 392.0],
-    melody: [523.25, 659.25, 783.99, 659.25],
-    interval: 3000,
-    waveform: "sine",
+    label: "Boîte à musique magique",
+    bpm: 76,
+    melody: [72, 76, 79, 83, 79, 76, 74, 79, 76, 72, 67, 71, 74, 79, 76, 72],
+    bass: [48, 55, 52, 55],
   },
   forest: {
-    label: "Forêt",
-    pad: [196.0, 246.94, 293.66],
-    melody: [392.0, 440.0, 493.88, 440.0],
-    interval: 3600,
-    waveform: "sine",
+    label: "Promenade en forêt",
+    bpm: 68,
+    melody: [67, 71, 74, 71, 69, 72, 76, 72, 67, 71, 74, 79, 76, 72, 71, 67],
+    bass: [43, 50, 47, 50],
   },
   dream: {
-    label: "Rêve",
-    pad: [220.0, 277.18, 329.63],
-    melody: [440.0, 554.37, 659.25, 554.37],
-    interval: 4200,
-    waveform: "sine",
+    label: "Rêve étoilé",
+    bpm: 62,
+    melody: [69, 73, 76, 81, 76, 73, 71, 76, 73, 69, 64, 68, 71, 76, 73, 69],
+    bass: [45, 52, 49, 52],
   },
   adventure: {
-    label: "Aventure douce",
-    pad: [174.61, 220.0, 261.63],
-    melody: [349.23, 440.0, 523.25, 440.0],
-    interval: 2600,
-    waveform: "triangle",
+    label: "Petite aventure",
+    bpm: 82,
+    melody: [65, 69, 72, 77, 72, 69, 67, 72, 69, 65, 60, 64, 67, 72, 69, 65],
+    bass: [41, 48, 45, 48],
   },
   night: {
     label: "Nuit calme",
-    pad: [146.83, 196.0, 220.0],
-    melody: [293.66, 392.0, 440.0, 392.0],
-    interval: 4800,
-    waveform: "sine",
+    bpm: 58,
+    melody: [64, 67, 71, 76, 71, 67, 66, 71, 67, 64, 59, 62, 66, 71, 67, 64],
+    bass: [40, 47, 43, 47],
   },
 };
 
@@ -55,7 +50,11 @@ export function getStoryMood(story) {
 }
 
 export function getMoodLabel(story) {
-  return PRESETS[getStoryMood(story)]?.label || "Ambiance douce";
+  return PRESETS[getStoryMood(story)]?.label || "Mélodie douce";
+}
+
+function midiToFrequency(note) {
+  return 440 * Math.pow(2, (note - 69) / 12);
 }
 
 function remember(node) {
@@ -64,63 +63,104 @@ function remember(node) {
 }
 
 function outputLevel(volume) {
-  // L'ancienne version multipliait deux gains très faibles et devenait presque inaudible.
-  // Le curseur de l'UI reste doux, mais on le convertit ici vers un niveau réellement audible.
-  return Math.max(0.16, Math.min(0.52, Number(volume || 0.11) * 3.2));
+  // Le curseur historique va de 0.04 à 0.18. On le convertit vers un niveau
+  // de boîte à musique audible mais suffisamment faible pour rester derrière la narration.
+  return Math.max(0.28, Math.min(0.62, Number(volume || 0.11) * 3.6));
 }
 
-function createPad(ctx, destination, preset) {
-  preset.pad.forEach((frequency, index) => {
-    const oscillator = remember(ctx.createOscillator());
-    const gain = remember(ctx.createGain());
-    const filter = remember(ctx.createBiquadFilter());
-
-    oscillator.type = preset.waveform;
-    oscillator.frequency.value = frequency;
-    oscillator.detune.value = index === 1 ? -4 : index === 2 ? 4 : 0;
-
-    filter.type = "lowpass";
-    filter.frequency.value = 760;
-    filter.Q.value = 0.35;
-
-    gain.gain.value = index === 0 ? 0.12 : index === 1 ? 0.085 : 0.065;
-    oscillator.connect(filter);
-    filter.connect(gain);
-    gain.connect(destination);
-    oscillator.start();
-  });
+function connectWithPan(ctx, source, destination, panValue) {
+  if (typeof ctx.createStereoPanner === "function") {
+    const panner = remember(ctx.createStereoPanner());
+    panner.pan.value = panValue;
+    source.connect(panner);
+    panner.connect(destination);
+  } else {
+    source.connect(destination);
+  }
 }
 
-function playSoftNote(ctx, destination, frequency) {
-  if (!ctx || ctx.state === "closed") return;
+function playMusicBoxNote(ctx, destination, midiNote, velocity = 1, pan = 0) {
+  if (!ctx || ctx.state !== "running") return;
+
   const now = ctx.currentTime;
-  const oscillator = ctx.createOscillator();
-  const gain = ctx.createGain();
-  const filter = ctx.createBiquadFilter();
+  const frequency = midiToFrequency(midiNote);
+  const noteGain = remember(ctx.createGain());
+  const filter = remember(ctx.createBiquadFilter());
+  const fundamental = remember(ctx.createOscillator());
+  const shimmer = remember(ctx.createOscillator());
+  const shimmerGain = remember(ctx.createGain());
 
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(frequency, now);
+  fundamental.type = "sine";
+  fundamental.frequency.setValueAtTime(frequency, now);
+  shimmer.type = "sine";
+  shimmer.frequency.setValueAtTime(frequency * 2.01, now);
+
   filter.type = "lowpass";
-  filter.frequency.value = 1650;
+  filter.frequency.value = 3200;
+  filter.Q.value = 0.4;
+
+  noteGain.gain.setValueAtTime(0.0001, now);
+  noteGain.gain.exponentialRampToValueAtTime(0.11 * velocity, now + 0.025);
+  noteGain.gain.exponentialRampToValueAtTime(0.026 * velocity, now + 0.45);
+  noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.7);
+
+  shimmerGain.gain.value = 0.23;
+  fundamental.connect(filter);
+  shimmer.connect(shimmerGain);
+  shimmerGain.connect(filter);
+  filter.connect(noteGain);
+  connectWithPan(ctx, noteGain, destination, pan);
+
+  fundamental.start(now);
+  shimmer.start(now);
+  fundamental.stop(now + 1.75);
+  shimmer.stop(now + 1.75);
+}
+
+function playSoftBass(ctx, destination, midiNote) {
+  if (!ctx || ctx.state !== "running") return;
+
+  const now = ctx.currentTime;
+  const oscillator = remember(ctx.createOscillator());
+  const gain = remember(ctx.createGain());
+  const filter = remember(ctx.createBiquadFilter());
+
+  oscillator.type = "triangle";
+  oscillator.frequency.value = midiToFrequency(midiNote);
+  filter.type = "lowpass";
+  filter.frequency.value = 540;
 
   gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.095, now + 0.06);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+  gain.gain.exponentialRampToValueAtTime(0.032, now + 0.08);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
 
   oscillator.connect(filter);
   filter.connect(gain);
   gain.connect(destination);
   oscillator.start(now);
-  oscillator.stop(now + 1.9);
+  oscillator.stop(now + 2.25);
 }
 
-function startMelody(ctx, destination, preset) {
-  let noteIndex = 0;
-  playSoftNote(ctx, destination, preset.melody[noteIndex]);
-  const timer = window.setInterval(() => {
-    noteIndex = (noteIndex + 1) % preset.melody.length;
-    playSoftNote(ctx, destination, preset.melody[noteIndex]);
-  }, preset.interval);
+function startMusicalLoop(ctx, destination, preset) {
+  const beatMs = 60000 / preset.bpm;
+  let step = 0;
+
+  const playStep = () => {
+    if (!audioContext || audioContext.state !== "running") return;
+    const note = preset.melody[step % preset.melody.length];
+    const pan = step % 2 === 0 ? -0.12 : 0.12;
+    playMusicBoxNote(ctx, destination, note, step % 4 === 0 ? 1 : 0.82, pan);
+
+    if (step % 4 === 0) {
+      const bassIndex = Math.floor(step / 4) % preset.bass.length;
+      playSoftBass(ctx, destination, preset.bass[bassIndex]);
+    }
+
+    step = (step + 1) % preset.melody.length;
+  };
+
+  playStep();
+  const timer = window.setInterval(playStep, beatMs);
   timers.push(timer);
 }
 
@@ -132,26 +172,25 @@ export async function startStoryAmbience(story, volume = 0.11) {
   const preset = PRESETS[getStoryMood(story)] || PRESETS.night;
   audioContext = new Ctx();
 
-  if (audioContext.state === "suspended") {
-    await audioContext.resume();
-  }
+  if (audioContext.state === "suspended") await audioContext.resume();
   if (audioContext.state !== "running") return false;
 
   const compressor = remember(audioContext.createDynamicsCompressor());
-  compressor.threshold.value = -24;
-  compressor.knee.value = 16;
-  compressor.ratio.value = 4;
+  compressor.threshold.value = -18;
+  compressor.knee.value = 18;
+  compressor.ratio.value = 3;
   compressor.attack.value = 0.01;
-  compressor.release.value = 0.25;
+  compressor.release.value = 0.35;
   compressor.connect(audioContext.destination);
 
   masterGain = audioContext.createGain();
   masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-  masterGain.gain.linearRampToValueAtTime(outputLevel(volume), audioContext.currentTime + 0.45);
+  masterGain.gain.linearRampToValueAtTime(outputLevel(volume), audioContext.currentTime + 0.35);
   masterGain.connect(compressor);
 
-  createPad(audioContext, masterGain, preset);
-  startMelody(audioContext, masterGain, preset);
+  // Plus aucun bourdonnement continu : uniquement des notes avec attaque et extinction,
+  // comme une petite boîte à musique derrière l'histoire.
+  startMusicalLoop(audioContext, masterGain, preset);
   return true;
 }
 
@@ -171,8 +210,8 @@ export async function stopStoryAmbience() {
       const now = audioContext.currentTime;
       masterGain.gain.cancelScheduledValues(now);
       masterGain.gain.setValueAtTime(Math.max(masterGain.gain.value, 0.0001), now);
-      masterGain.gain.linearRampToValueAtTime(0.0001, now + 0.18);
-      await new Promise((resolve) => window.setTimeout(resolve, 190));
+      masterGain.gain.linearRampToValueAtTime(0.0001, now + 0.16);
+      await new Promise((resolve) => window.setTimeout(resolve, 170));
     } catch (_) {}
   }
 
