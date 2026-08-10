@@ -1,3 +1,5 @@
+import "./audioStyles.css";
+
 let audioContext = null;
 let masterGain = null;
 let activeNodes = [];
