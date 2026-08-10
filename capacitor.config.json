@@ -1,0 +1,9 @@
+{
+  "appId": "com.tikowiko.histoires",
+  "appName": "Histoires & Comptines",
+  "webDir": "build",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {}
+}
