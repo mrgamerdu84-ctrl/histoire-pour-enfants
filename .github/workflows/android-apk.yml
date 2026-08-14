@@ -38,6 +38,48 @@ jobs:
       - name: Sync Capacitor plugins
         run: npx cap sync android
 
+      - name: Install image tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin imagemagick
+
+      - name: Generate Android icon and splash assets
+        run: |
+          set -e
+          mkdir -p /tmp/branding
+          rsvg-convert branding/icon.svg -w 1024 -h 1024 -o /tmp/branding/icon.png
+          rsvg-convert branding/splash.svg -w 1080 -h 1920 -o /tmp/branding/splash.png
+
+          for spec in \
+            "mipmap-mdpi 48" \
+            "mipmap-hdpi 72" \
+            "mipmap-xhdpi 96" \
+            "mipmap-xxhdpi 144" \
+            "mipmap-xxxhdpi 192"; do
+            set -- $spec
+            dir="$1"
+            size="$2"
+            mkdir -p "android/app/src/main/res/$dir"
+            convert /tmp/branding/icon.png -resize "${size}x${size}" "android/app/src/main/res/$dir/ic_launcher.png"
+            cp "android/app/src/main/res/$dir/ic_launcher.png" "android/app/src/main/res/$dir/ic_launcher_round.png"
+          done
+
+          for spec in \
+            "drawable-port-mdpi 320x568" \
+            "drawable-port-hdpi 480x854" \
+            "drawable-port-xhdpi 720x1280" \
+            "drawable-port-xxhdpi 1080x1920" \
+            "drawable-port-xxxhdpi 1440x2560"; do
+            set -- $spec
+            dir="$1"
+            size="$2"
+            mkdir -p "android/app/src/main/res/$dir"
+            convert /tmp/branding/splash.png -resize "${size}^" -gravity center -extent "$size" "android/app/src/main/res/$dir/splash.png"
+          done
+
+          mkdir -p android/app/src/main/res/drawable
+          cp android/app/src/main/res/drawable-port-xxhdpi/splash.png android/app/src/main/res/drawable/splash.png
+
       - name: Build debug APK
         working-directory: android
         run: |
