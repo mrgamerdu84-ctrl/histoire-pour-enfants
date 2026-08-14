@@ -1,0 +1,226 @@
+/* Couche visuelle complémentaire : plus chaleureuse, mobile et musicale */
+
+.app {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255, 193, 221, .28), transparent 26rem),
+    radial-gradient(circle at 84% 14%, rgba(127, 191, 255, .28), transparent 28rem),
+    radial-gradient(circle at 50% 100%, rgba(255, 211, 112, .13), transparent 34rem),
+    linear-gradient(155deg, #17142f, #30235d 58%, #1f315c);
+}
+
+.shell {
+  border-radius: 32px;
+  box-shadow: 0 34px 100px rgba(5, 3, 25, .42), inset 0 1px 0 rgba(255,255,255,.55);
+}
+
+.brand {
+  font-size: 15px;
+}
+
+.brandMark {
+  background: linear-gradient(135deg, #7557df, #d36eb1 58%, #efb058);
+}
+
+.coverView {
+  position: relative;
+}
+
+.coverView::before,
+.coverView::after {
+  content: "♪";
+  position: absolute;
+  z-index: -1;
+  color: color-mix(in srgb, var(--violet) 26%, transparent);
+  font-size: clamp(36px, 8vw, 68px);
+  font-weight: 900;
+  animation: floatNote 5s ease-in-out infinite;
+}
+
+.coverView::before { left: 8%; top: 20%; transform: rotate(-12deg); }
+.coverView::after { right: 8%; top: 31%; animation-delay: -2.4s; }
+
+@keyframes floatNote {
+  0%, 100% { transform: translateY(0) rotate(-8deg); opacity: .38; }
+  50% { transform: translateY(-12px) rotate(5deg); opacity: .7; }
+}
+
+.heroBadge {
+  box-shadow: 0 8px 22px rgba(74, 48, 151, .11);
+}
+
+.heroIcon {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.65);
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,.95), transparent 16%),
+    linear-gradient(145deg, #fff0bd, #f9bfd5 52%, #c8c1ff);
+  animation: heroFloat 4.5s ease-in-out infinite;
+}
+
+@keyframes heroFloat {
+  0%,100% { transform: rotate(-3deg) translateY(0); }
+  50% { transform: rotate(2deg) translateY(-6px); }
+}
+
+.coverView h1 {
+  background: linear-gradient(115deg, var(--ink), color-mix(in srgb, var(--violet) 70%, var(--ink)) 58%, color-mix(in srgb, var(--rose) 60%, var(--ink)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.choiceCard {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.choiceCard::after {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  right: -50px;
+  top: -55px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--violet) 10%, transparent);
+  z-index: -1;
+}
+
+.choiceCard--songs::after {
+  background: color-mix(in srgb, var(--rose) 12%, transparent);
+}
+
+.choiceCard strong {
+  font-size: 19px;
+  letter-spacing: -.02em;
+}
+
+.choiceCard:hover .choiceIcon,
+.choiceCard:active .choiceIcon {
+  transform: scale(1.06) rotate(-3deg);
+}
+
+.choiceIcon {
+  transition: transform .2s ease;
+  box-shadow: 0 10px 22px rgba(83, 57, 167, .2);
+}
+
+.featureRow span {
+  border: 1px solid color-mix(in srgb, var(--violet) 10%, transparent);
+  background: color-mix(in srgb, var(--violet) 5%, var(--surface-strong));
+}
+
+.pickerStrip {
+  mask-image: linear-gradient(to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%);
+}
+
+.pickerCard {
+  min-height: 48px;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.pickerCard:active { transform: scale(.97); }
+
+.pickerCard--active {
+  transform: translateY(-1px);
+}
+
+.readerCard {
+  box-shadow: 0 22px 48px rgba(42, 28, 88, .13);
+}
+
+.readerCard::after {
+  content: "♫";
+  position: absolute;
+  right: 22px;
+  bottom: 14px;
+  color: color-mix(in srgb, var(--reader-accent) 10%, transparent);
+  font-size: 70px;
+  font-weight: 900;
+  pointer-events: none;
+}
+
+.storyText {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--reader-accent) 5%, transparent);
+}
+
+.playButton {
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--reader-accent, var(--violet)) 24%, transparent);
+  transition: transform .18s ease, filter .18s ease;
+}
+
+.playButton:active {
+  transform: scale(.97);
+  filter: brightness(.96);
+}
+
+@media (max-width: 620px) {
+  .app {
+    padding: 0;
+  }
+
+  .shell {
+    min-height: 100dvh;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .topbar {
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+
+  .coverView {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .heroIcon {
+    width: 96px;
+    height: 96px;
+    font-size: 50px;
+    border-radius: 29px;
+  }
+
+  .choiceGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .choiceCard {
+    min-height: 104px;
+    border-radius: 20px;
+  }
+
+  .libraryView {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .pickerStrip {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .readerCard {
+    padding: 20px 17px;
+    border-radius: 22px;
+  }
+
+  .storyText {
+    min-height: 150px;
+    font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coverView::before,
+  .coverView::after,
+  .heroIcon {
+    animation: none;
+  }
+}
