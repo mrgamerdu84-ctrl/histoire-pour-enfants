@@ -3,6 +3,14 @@ import { CONTES_2 } from "./data/contes2";
 import { CONTES_3 } from "./data/contes3";
 import { CONTES_4 } from "./data/contes4";
 import { MISSIONS } from "./data/missions";
+import { HISTOIRES_MUSIQUE } from "./data/histoiresMusique";
 export { COMPTINES } from "./data/comptines";
 
-export const CONTES = [...CONTES_1, ...CONTES_2, ...CONTES_3, ...CONTES_4, ...MISSIONS];
+export const CONTES = [
+  ...CONTES_1,
+  ...CONTES_2,
+  ...CONTES_3,
+  ...CONTES_4,
+  ...MISSIONS,
+  ...HISTOIRES_MUSIQUE,
+];
