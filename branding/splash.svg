@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#18264f"/>
+      <stop offset="0.55" stop-color="#4e3e9f"/>
+      <stop offset="1" stop-color="#8d6ac8"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="48%" r="45%">
+      <stop offset="0" stop-color="#ffe9a5" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffe9a5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+  <rect width="1080" height="1920" fill="url(#glow)"/>
+  <g fill="#fff8cf" opacity=".95">
+    <circle cx="170" cy="250" r="9"/><circle cx="260" cy="360" r="6"/><circle cx="875" cy="280" r="8"/><circle cx="780" cy="420" r="5"/><circle cx="920" cy="610" r="7"/><circle cx="120" cy="690" r="5"/>
+  </g>
+  <path d="M805 300c-70 25-119 91-119 169 0 99 80 179 179 179 31 0 60-8 85-21-40 64-111 107-192 107-125 0-226-101-226-226s101-226 226-226c16 0 32 2 47 5z" fill="#fff1a6"/>
+  <g transform="translate(190 760)">
+    <path d="M350 0c-115-92-258-102-380-37v470c124-63 267-52 380 41z" fill="#fff8df"/>
+    <path d="M350 0c115-92 258-102 380-37v470c-124-63-267-52-380 41z" fill="#fff0bd"/>
+    <path d="M350 0v474" stroke="#d9b45c" stroke-width="20" stroke-linecap="round"/>
+    <path d="M45 126c74-25 143-20 207 15M45 220c74-25 143-20 207 15M448 126c74-25 143-20 207 15M448 220c74-25 143-20 207 15" stroke="#c49a42" stroke-width="18" stroke-linecap="round" fill="none"/>
+  </g>
+  <text x="540" y="1395" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="92" font-weight="700">Histoires &amp; Comptines</text>
+  <text x="540" y="1485" text-anchor="middle" fill="#efe7ff" font-family="Arial, sans-serif" font-size="38">Un petit monde à écouter avant de rêver</text>
+</svg>
