@@ -34,5 +34,17 @@ export const CONTES_1 = [
       "Le jour de ses seize ans, explorant les recoins oubliés du château, la princesse découvrit une vieille femme filant au rouet dans une tourelle. Curieuse, elle voulut essayer, se piqua le doigt, et s'effondra aussitôt. Tout le château s'endormit avec elle — gardes, servantes, jusqu'aux chevaux dans les écuries — et une forêt d'épines immenses s'éleva tout autour, cachant le domaine aux regards du monde.",
       "Cent années passèrent, et les légendes du château englouti par les ronces attirèrent bien des prétendants, tous vaincus par les épines. Puis vint un prince pour qui la forêt, comme par grâce, s'ouvrit d'elle-même. Il traversa le château figé dans le temps, trouva la princesse endormie dans sa tourelle, et l'embrassa. Elle ouvrit les yeux — et avec elle, le château tout entier se réveilla.",
     ],
+  },
+  {
+    id: "trois-petits-cochons",
+    title: "Les Trois Petits Cochons",
+    origin: "conte traditionnel — adaptation originale",
+    accent: "#D87972",
+    pages: [
+      "Il était une fois trois petits cochons qui décidèrent de quitter la maison familiale pour construire chacun leur propre foyer. Le premier aimait aller vite et bâtit une petite maison de paille. Le deuxième choisit des branches et construisit une maison de bois. Le troisième prit davantage de temps : il empila soigneusement des briques pour fabriquer une maison solide et confortable.",
+      "Un jour, un loup arriva près de la maison de paille. Le premier petit cochon eut juste le temps de courir se mettre à l'abri chez son frère. La maison de paille ne résista pas longtemps au grand souffle du loup. Les deux frères filèrent alors jusqu'à la maison de bois, où ils pensaient être tranquilles.",
+      "Mais le loup les suivit. La maison de bois trembla et finit elle aussi par céder. Les deux cochons rejoignirent leur troisième frère dans la maison de briques. Cette fois, malgré tous ses efforts, le loup ne réussit pas à faire bouger les murs. Les trois frères comprirent qu'un travail patient et bien fait pouvait faire toute la différence.",
+      "Le loup finit par abandonner et repartit dans la forêt. Les trois petits cochons célébrèrent leur sécurité autour d'un bon repas. Les deux premiers aidèrent ensuite leur frère à améliorer le jardin et promirent de prendre davantage leur temps pour leurs prochains projets. Depuis ce jour, ils vécurent heureux dans leur solide maison de briques.",
+    ],
   }
 ];
