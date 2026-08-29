@@ -39,6 +39,7 @@ export default function App() {
   const [ambienceVolume, setAmbienceVolume] = useState(0.11);
   const speechRun = useRef(0);
   const songAudioRef = useRef(null);
+  const webUtteranceRef = useRef(null);
 
   const currentStory = CONTES[currentStoryIdx];
   const currentComptine = COMPTINES[currentComptineIdx];
@@ -48,6 +49,7 @@ export default function App() {
       await TextToSpeech.stop();
     } catch (_) {}
     if (window.speechSynthesis) window.speechSynthesis.cancel();
+    webUtteranceRef.current = null;
   };
 
   const stopSong = async () => {
@@ -56,6 +58,8 @@ export default function App() {
       try {
         audio.pause();
         audio.currentTime = 0;
+        audio.removeAttribute("src");
+        audio.load();
       } catch (_) {}
       songAudioRef.current = null;
     }
@@ -81,15 +85,23 @@ export default function App() {
         return;
       }
       const utterance = new SpeechSynthesisUtterance(text);
+      webUtteranceRef.current = utterance;
       utterance.lang = "fr-FR";
       utterance.rate = speechRate;
       utterance.pitch = 1;
       utterance.volume = 1;
       const voices = window.speechSynthesis.getVoices();
-      const frenchVoice = voices.find((voice) => voice.lang?.toLowerCase().startsWith("fr"));
+      const frenchVoices = voices.filter((voice) => voice.lang?.toLowerCase().startsWith("fr"));
+      const frenchVoice = frenchVoices.find((voice) => voice.localService) || frenchVoices[0];
       if (frenchVoice) utterance.voice = frenchVoice;
-      utterance.onend = resolve;
-      utterance.onerror = () => reject(new Error("Erreur de lecture vocale"));
+      utterance.onend = () => {
+        if (webUtteranceRef.current === utterance) webUtteranceRef.current = null;
+        resolve();
+      };
+      utterance.onerror = () => {
+        if (webUtteranceRef.current === utterance) webUtteranceRef.current = null;
+        reject(new Error("Erreur de lecture vocale"));
+      };
       window.speechSynthesis.speak(utterance);
     });
 
@@ -101,7 +113,7 @@ export default function App() {
         rate: speechRate,
         pitch: 1,
         volume: 1,
-        queueStrategy: 0,
+        queueStrategy: 1,
       });
     } catch (_) {
       await speakWithWebFallback(text);
@@ -126,6 +138,8 @@ export default function App() {
         if (speechRun.current !== myRun) return;
         setStoryPageIdx(page);
         await speakText(currentStory.pages[page]);
+        if (speechRun.current !== myRun) return;
+        await new Promise((resolve) => window.setTimeout(resolve, 180));
       }
     } catch (_) {
       if (speechRun.current === myRun) {
@@ -148,21 +162,30 @@ export default function App() {
     }
 
     try {
-      const audio = new Audio(currentComptine.audioUrl);
+      const audio = new Audio();
       audio.preload = "auto";
+      audio.playsInline = true;
+      audio.src = currentComptine.audioUrl;
       songAudioRef.current = audio;
+      audio.onplaying = () => {
+        if (songAudioRef.current === audio) setIsSongPlaying(true);
+      };
       audio.onended = () => {
-        songAudioRef.current = null;
+        if (songAudioRef.current === audio) songAudioRef.current = null;
         setIsSongPlaying(false);
       };
       audio.onerror = () => {
-        songAudioRef.current = null;
+        if (songAudioRef.current === audio) songAudioRef.current = null;
         setIsSongPlaying(false);
         setSongError("La piste chantée n'a pas pu être chargée. Vérifie la connexion puis réessaie.");
       };
-      setIsSongPlaying(true);
+      audio.load();
       await audio.play();
     } catch (_) {
+      const audio = songAudioRef.current;
+      if (audio) {
+        try { audio.pause(); } catch (_) {}
+      }
       songAudioRef.current = null;
       setIsSongPlaying(false);
       setSongError("La piste chantée n'a pas pu démarrer. Réessaie avec une connexion internet active.");
@@ -208,6 +231,7 @@ export default function App() {
       speechRun.current += 1;
       try { TextToSpeech.stop(); } catch (_) {}
       if (window.speechSynthesis) window.speechSynthesis.cancel();
+      webUtteranceRef.current = null;
       const audio = songAudioRef.current;
       if (audio) {
         try { audio.pause(); } catch (_) {}
