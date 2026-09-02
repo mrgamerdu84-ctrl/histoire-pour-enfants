@@ -26,16 +26,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Prepare exact branding assets
+      - name: Prepare launch branding
         run: |
           set -e
-          mkdir -p public/branding /tmp/branding
+          mkdir -p public/branding
           cp branding/icon.jpg public/branding/icon.jpg
-          cat branding/splash.b64.* | tr -d '\r\n' | base64 -d > public/branding/splash.jpg
-          cp public/branding/splash.jpg /tmp/branding/splash.jpg
-          cp branding/icon.jpg /tmp/branding/icon.jpg
-          test -s /tmp/branding/icon.jpg
-          test -s /tmp/branding/splash.jpg
+          cp branding/splash.svg public/branding/splash.svg
+          test -s public/branding/icon.jpg
+          test -s public/branding/splash.svg
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -52,14 +50,16 @@ jobs:
       - name: Install image tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y imagemagick
+          sudo apt-get install -y librsvg2-bin imagemagick
 
       - name: Generate Android icon and splash assets
         run: |
           set -e
+          mkdir -p /tmp/branding
+          cp branding/icon.jpg /tmp/branding/icon.jpg
+          rsvg-convert branding/splash.svg -w 1080 -h 1920 -o /tmp/branding/splash.png
 
-          # Android 8+ préfère sinon l'ancienne icône adaptative créée par défaut.
-          # On la retire pour forcer l'utilisation de l'image fournie par l'utilisateur.
+          # Retire l'icône adaptative créée par défaut afin d'utiliser l'icône fournie.
           rm -rf android/app/src/main/res/mipmap-anydpi-v26
 
           for spec in \
@@ -86,7 +86,7 @@ jobs:
             dir="$1"
             size="$2"
             mkdir -p "android/app/src/main/res/$dir"
-            convert /tmp/branding/splash.jpg -resize "$size" -background '#07184a' -gravity center -extent "$size" "android/app/src/main/res/$dir/splash.png"
+            convert /tmp/branding/splash.png -resize "${size}^" -gravity center -extent "$size" "android/app/src/main/res/$dir/splash.png"
           done
 
           mkdir -p android/app/src/main/res/drawable
