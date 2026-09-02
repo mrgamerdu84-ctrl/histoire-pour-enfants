@@ -1,35 +1,76 @@
+.readerCard--song {
+  display: flex;
+  flex-direction: column;
+}
+
+.readerCard--song .readerMeta { order: 1; }
+.readerCard--song .musicDisc { order: 2; }
+.readerCard--song h2 { order: 3; }
+.readerCard--song .lyricsCard { order: 4; }
+.readerCard--song .songHint { order: 5; }
+.readerCard--song .songSourceCard { order: 6; }
+.readerCard--song .playButton { order: 7; }
+
 .lyricsCard {
-  margin: 16px 0 18px;
-  padding: 18px;
-  border: 1px solid color-mix(in srgb, var(--reader-accent) 22%, var(--line));
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100%;
+  margin: 14px 0 16px;
+  padding: 18px 16px;
+  border: 2px solid color-mix(in srgb, var(--reader-accent) 48%, var(--line));
   border-radius: 18px;
-  background: color-mix(in srgb, var(--reader-accent) 6%, var(--surface-strong));
+  background: color-mix(in srgb, var(--reader-accent) 10%, var(--surface-strong));
   text-align: left;
+  overflow: visible;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--reader-accent) 12%, transparent);
 }
 
 .lyricsCard > strong {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: var(--reader-accent);
-  font-size: 13px;
-  letter-spacing: .04em;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .05em;
   text-transform: uppercase;
+}
+
+.lyricsCard > strong::before {
+  content: "📝 ";
 }
 
 .lyricsLines {
   display: grid;
-  gap: 7px;
+  gap: 9px;
 }
 
 .lyricsLines p {
+  display: block !important;
+  visibility: visible !important;
   margin: 0;
-  color: var(--ink);
+  padding: 7px 9px;
+  border-radius: 10px;
+  color: var(--ink) !important;
+  background: color-mix(in srgb, var(--surface-strong) 86%, transparent);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(15px, 3.2vw, 17px);
+  font-size: clamp(17px, 4vw, 19px);
+  font-weight: 650;
   line-height: 1.55;
 }
 
 .readerCard--song .songSourceCard small {
   display: block;
   margin-top: 4px;
+}
+
+@media (max-width: 620px) {
+  .lyricsCard {
+    margin-top: 10px;
+    padding: 16px 13px;
+  }
+
+  .lyricsLines p {
+    font-size: 17px;
+  }
 }
