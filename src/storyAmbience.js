@@ -29,8 +29,8 @@ function midiToFrequency(note) { return 440 * Math.pow(2, (note - 69) / 12); }
 function remember(node) { activeNodes.push(node); return node; }
 
 function outputLevel(volume) {
-  // Fond musical volontairement un peu plus présent, tout en restant sous la narration.
-  return Math.max(0.36, Math.min(0.72, Number(volume || 0.11) * 4.25));
+  // Plus présent qu'avant pour rester clairement audible sous la narration Android.
+  return Math.max(0.62, Math.min(0.95, Number(volume || 0.14) * 5.5));
 }
 
 function connectWithPan(ctx, source, destination, panValue) {
@@ -53,12 +53,12 @@ function playMusicBoxNote(ctx, destination, midiNote, velocity = 1, pan = 0) {
   const shimmerGain = remember(ctx.createGain());
   fundamental.type = "sine"; fundamental.frequency.setValueAtTime(frequency, now);
   shimmer.type = "sine"; shimmer.frequency.setValueAtTime(frequency * 2.01, now);
-  filter.type = "lowpass"; filter.frequency.value = 3200; filter.Q.value = 0.4;
+  filter.type = "lowpass"; filter.frequency.value = 3400; filter.Q.value = 0.4;
   noteGain.gain.setValueAtTime(0.0001, now);
-  noteGain.gain.exponentialRampToValueAtTime(0.11 * velocity, now + 0.025);
-  noteGain.gain.exponentialRampToValueAtTime(0.026 * velocity, now + 0.45);
+  noteGain.gain.exponentialRampToValueAtTime(0.145 * velocity, now + 0.025);
+  noteGain.gain.exponentialRampToValueAtTime(0.036 * velocity, now + 0.45);
   noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.7);
-  shimmerGain.gain.value = 0.23;
+  shimmerGain.gain.value = 0.27;
   fundamental.connect(filter); shimmer.connect(shimmerGain); shimmerGain.connect(filter); filter.connect(noteGain);
   connectWithPan(ctx, noteGain, destination, pan);
   fundamental.start(now); shimmer.start(now); fundamental.stop(now + 1.75); shimmer.stop(now + 1.75);
@@ -69,8 +69,8 @@ function playSoftBass(ctx, destination, midiNote) {
   const now = ctx.currentTime;
   const oscillator = remember(ctx.createOscillator()); const gain = remember(ctx.createGain()); const filter = remember(ctx.createBiquadFilter());
   oscillator.type = "triangle"; oscillator.frequency.value = midiToFrequency(midiNote);
-  filter.type = "lowpass"; filter.frequency.value = 540;
-  gain.gain.setValueAtTime(0.0001, now); gain.gain.exponentialRampToValueAtTime(0.032, now + 0.08); gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
+  filter.type = "lowpass"; filter.frequency.value = 560;
+  gain.gain.setValueAtTime(0.0001, now); gain.gain.exponentialRampToValueAtTime(0.042, now + 0.08); gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
   oscillator.connect(filter); filter.connect(gain); gain.connect(destination); oscillator.start(now); oscillator.stop(now + 2.25);
 }
 
@@ -79,26 +79,26 @@ function startMusicalLoop(ctx, destination, preset) {
   const playStep = () => {
     if (!audioContext || audioContext.state !== "running") return;
     const note = preset.melody[step % preset.melody.length]; const pan = step % 2 === 0 ? -0.12 : 0.12;
-    playMusicBoxNote(ctx, destination, note, step % 4 === 0 ? 1 : 0.82, pan);
+    playMusicBoxNote(ctx, destination, note, step % 4 === 0 ? 1 : 0.86, pan);
     if (step % 4 === 0) playSoftBass(ctx, destination, preset.bass[Math.floor(step / 4) % preset.bass.length]);
     step = (step + 1) % preset.melody.length;
   };
   playStep(); timers.push(window.setInterval(playStep, beatMs));
 }
 
-export async function startStoryAmbience(story, volume = 0.11) {
+export async function startStoryAmbience(story, volume = 0.14) {
   await stopStoryAmbience(); const Ctx = AudioCtx(); if (!Ctx) return false;
   const preset = PRESETS[getStoryMood(story)] || PRESETS.night; audioContext = new Ctx();
   if (audioContext.state === "suspended") await audioContext.resume(); if (audioContext.state !== "running") return false;
   const compressor = remember(audioContext.createDynamicsCompressor());
-  compressor.threshold.value = -18; compressor.knee.value = 18; compressor.ratio.value = 3; compressor.attack.value = 0.01; compressor.release.value = 0.35; compressor.connect(audioContext.destination);
-  masterGain = audioContext.createGain(); masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime); masterGain.gain.linearRampToValueAtTime(outputLevel(volume), audioContext.currentTime + 0.35); masterGain.connect(compressor);
+  compressor.threshold.value = -18; compressor.knee.value = 18; compressor.ratio.value = 2.6; compressor.attack.value = 0.01; compressor.release.value = 0.35; compressor.connect(audioContext.destination);
+  masterGain = audioContext.createGain(); masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime); masterGain.gain.linearRampToValueAtTime(outputLevel(volume), audioContext.currentTime + 0.28); masterGain.connect(compressor);
   startMusicalLoop(audioContext, masterGain, preset); return true;
 }
 
 export function setStoryAmbienceVolume(volume) {
   if (!masterGain || !audioContext || audioContext.state === "closed") return;
-  const target = outputLevel(volume); masterGain.gain.cancelScheduledValues(audioContext.currentTime); masterGain.gain.linearRampToValueAtTime(target, audioContext.currentTime + 0.2);
+  const target = outputLevel(volume); masterGain.gain.cancelScheduledValues(audioContext.currentTime); masterGain.gain.linearRampToValueAtTime(target, audioContext.currentTime + 0.18);
 }
 
 export async function stopStoryAmbience() {
