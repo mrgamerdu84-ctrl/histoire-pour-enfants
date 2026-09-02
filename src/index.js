@@ -17,7 +17,7 @@ function RootApp() {
     <>
       {showLaunchSplash && (
         <div className="launchSplash" aria-label="Écran de démarrage Histoires & Comptines">
-          <img src={`${process.env.PUBLIC_URL}/branding/splash.jpg`} alt="Histoires & Comptines" />
+          <img src={`${process.env.PUBLIC_URL}/branding/splash.svg`} alt="Histoires & Comptines" />
         </div>
       )}
       <App />
