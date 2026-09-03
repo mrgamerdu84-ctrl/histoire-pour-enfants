@@ -1,0 +1,14 @@
+.shell::after {
+  content: "© 2026 tikowikoFamily";
+  display: block;
+  padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+  text-align: center;
+  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.app--night .shell::after {
+  color: rgba(255,255,255,.68);
+}
