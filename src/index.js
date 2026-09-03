@@ -4,6 +4,7 @@ import App from './App';
 import './designEnhancements.css';
 import './lyricsStyles.css';
 import './launchSplash.css';
+import './copyright.css';
 
 function RootApp() {
   const [showLaunchSplash, setShowLaunchSplash] = useState(true);
