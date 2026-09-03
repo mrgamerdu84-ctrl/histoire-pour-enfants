@@ -59,9 +59,7 @@ jobs:
           cp branding/icon.jpg /tmp/branding/icon.jpg
           rsvg-convert branding/splash.svg -w 1080 -h 1920 -o /tmp/branding/splash.png
 
-          # Retire l'icône adaptative créée par défaut afin d'utiliser l'icône fournie.
-          rm -rf android/app/src/main/res/mipmap-anydpi-v26
-
+          # Icônes classiques : on garde exactement le visuel fourni, uniquement redimensionné.
           for spec in \
             "mipmap-mdpi 48" \
             "mipmap-hdpi 72" \
@@ -72,9 +70,59 @@ jobs:
             dir="$1"
             size="$2"
             mkdir -p "android/app/src/main/res/$dir"
-            convert /tmp/branding/icon.jpg -resize "${size}x${size}" -background white -gravity center -extent "${size}x${size}" "android/app/src/main/res/$dir/ic_launcher.png"
+            convert /tmp/branding/icon.jpg \
+              -resize "${size}x${size}" \
+              -background '#5B4BA8' \
+              -gravity center \
+              -extent "${size}x${size}" \
+              "android/app/src/main/res/$dir/ic_launcher.png"
             cp "android/app/src/main/res/$dir/ic_launcher.png" "android/app/src/main/res/$dir/ic_launcher_round.png"
           done
+
+          # Android 8+ : vraie icône adaptative pour éviter zoom, découpe ou petite icône blanche.
+          # Le dessin d'origine reste intact ; seule une marge de sécurité Android est ajoutée autour.
+          for spec in \
+            "mipmap-mdpi 108 66" \
+            "mipmap-hdpi 162 99" \
+            "mipmap-xhdpi 216 132" \
+            "mipmap-xxhdpi 324 198" \
+            "mipmap-xxxhdpi 432 264"; do
+            set -- $spec
+            dir="$1"
+            canvas="$2"
+            art="$3"
+            mkdir -p "android/app/src/main/res/$dir"
+            convert /tmp/branding/icon.jpg \
+              -resize "${art}x${art}" \
+              -background none \
+              -gravity center \
+              -extent "${canvas}x${canvas}" \
+              "android/app/src/main/res/$dir/ic_launcher_foreground.png"
+          done
+
+          mkdir -p android/app/src/main/res/mipmap-anydpi-v26 android/app/src/main/res/values
+          cat > android/app/src/main/res/values/ic_launcher_background.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="ic_launcher_background">#5B4BA8</color>
+          </resources>
+          EOF
+
+          cat > android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@color/ic_launcher_background" />
+              <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+          </adaptive-icon>
+          EOF
+
+          cat > android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@color/ic_launcher_background" />
+              <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+          </adaptive-icon>
+          EOF
 
           for spec in \
             "drawable-port-mdpi 320x568" \
