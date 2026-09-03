@@ -50,7 +50,7 @@ jobs:
       - name: Install image tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y librsvg2-bin imagemagick python3-pil
+          sudo apt-get install -y librsvg2-bin imagemagick
 
       - name: Generate Android icon and splash assets
         run: |
@@ -58,103 +58,11 @@ jobs:
           mkdir -p /tmp/branding
           rsvg-convert branding/splash.svg -w 1080 -h 1920 -o /tmp/branding/splash.png
 
-          # Nettoie l'image source sans redessiner le visuel :
-          # on garde uniquement le plus grand bloc non-blanc (l'icône elle-même),
-          # puis on rend transparentes les marges blanches extérieures.
-          python3 <<'PY'
-          from PIL import Image
-          from collections import deque
-
-          src = Image.open('branding/icon.jpg').convert('RGB')
-          w, h = src.size
-          px = src.load()
-
-          def non_white(x, y):
-              r, g, b = px[x, y]
-              return min(r, g, b) < 235 or (max(r, g, b) - min(r, g, b)) > 18
-
-          seen = bytearray(w * h)
-          best = None
-          best_count = 0
-
-          for y in range(h):
-              for x in range(w):
-                  idx = y * w + x
-                  if seen[idx] or not non_white(x, y):
-                      continue
-                  q = deque([(x, y)])
-                  seen[idx] = 1
-                  count = 0
-                  minx = maxx = x
-                  miny = maxy = y
-                  while q:
-                      cx, cy = q.popleft()
-                      count += 1
-                      minx = min(minx, cx); maxx = max(maxx, cx)
-                      miny = min(miny, cy); maxy = max(maxy, cy)
-                      for nx, ny in ((cx-1,cy),(cx+1,cy),(cx,cy-1),(cx,cy+1)):
-                          if nx < 0 or ny < 0 or nx >= w or ny >= h:
-                              continue
-                          nidx = ny * w + nx
-                          if seen[nidx] or not non_white(nx, ny):
-                              continue
-                          seen[nidx] = 1
-                          q.append((nx, ny))
-                  if count > best_count:
-                      best_count = count
-                      best = (minx, miny, maxx + 1, maxy + 1)
-
-          if not best or best_count < 1000:
-              raise RuntimeError('Impossible de détecter le visuel principal de l’icône')
-
-          left, top, right, bottom = best
-          margin = 3
-          left = max(0, left - margin); top = max(0, top - margin)
-          right = min(w, right + margin); bottom = min(h, bottom + margin)
-          icon = src.crop((left, top, right, bottom)).convert('RGBA')
-
-          # Met au carré sans déformer.
-          side = max(icon.width, icon.height)
-          square = Image.new('RGBA', (side, side), (255,255,255,0))
-          ox = (side - icon.width) // 2
-          oy = (side - icon.height) // 2
-          square.alpha_composite(icon, (ox, oy))
-
-          # Les zones presque blanches reliées aux bords deviennent transparentes.
-          rgba = square.load()
-          sw, sh = square.size
-          visited = bytearray(sw * sh)
-          q = deque()
-          for x in range(sw):
-              q.append((x,0)); q.append((x,sh-1))
-          for y in range(sh):
-              q.append((0,y)); q.append((sw-1,y))
-
-          def edge_white(x, y):
-              r,g,b,a = rgba[x,y]
-              return a > 0 and r > 238 and g > 238 and b > 238 and max(r,g,b)-min(r,g,b) < 14
-
-          while q:
-              x,y = q.popleft()
-              idx = y * sw + x
-              if visited[idx]:
-                  continue
-              visited[idx] = 1
-              if not edge_white(x,y):
-                  continue
-              r,g,b,a = rgba[x,y]
-              rgba[x,y] = (r,g,b,0)
-              for nx,ny in ((x-1,y),(x+1,y),(x,y-1),(x,y+1)):
-                  if 0 <= nx < sw and 0 <= ny < sh:
-                      q.append((nx,ny))
-
-          square.save('/tmp/branding/icon-clean.png')
-          print('Icône détectée :', best, '=>', square.size)
-          PY
-
+          # L'icône source est déjà le visuel carré exact fourni.
+          # ImageMagick tolère le flux JPEG et évite le plantage Pillow des builds précédents.
+          convert branding/icon.jpg -auto-orient -strip /tmp/branding/icon-clean.png
           test -s /tmp/branding/icon-clean.png
 
-          # Icônes classiques : carré propre, sans texte parasite ni déformation.
           for spec in \
             "mipmap-mdpi 48" \
             "mipmap-hdpi 72" \
@@ -167,19 +75,20 @@ jobs:
             mkdir -p "android/app/src/main/res/$dir"
             convert /tmp/branding/icon-clean.png \
               -resize "${size}x${size}" \
+              -background '#2B176D' \
               -gravity center \
               -extent "${size}x${size}" \
               "android/app/src/main/res/$dir/ic_launcher.png"
             cp "android/app/src/main/res/$dir/ic_launcher.png" "android/app/src/main/res/$dir/ic_launcher_round.png"
           done
 
-          # Android 8+ : icône adaptative avec une zone de sécurité correcte.
+          # Icône adaptative Android : le dessin complet est placé dans la zone sûre.
           for spec in \
-            "mipmap-mdpi 108 76" \
-            "mipmap-hdpi 162 114" \
-            "mipmap-xhdpi 216 152" \
-            "mipmap-xxhdpi 324 228" \
-            "mipmap-xxxhdpi 432 304"; do
+            "mipmap-mdpi 108 72" \
+            "mipmap-hdpi 162 108" \
+            "mipmap-xhdpi 216 144" \
+            "mipmap-xxhdpi 324 216" \
+            "mipmap-xxxhdpi 432 288"; do
             set -- $spec
             dir="$1"
             canvas="$2"
@@ -187,7 +96,7 @@ jobs:
             mkdir -p "android/app/src/main/res/$dir"
             convert /tmp/branding/icon-clean.png \
               -resize "${art}x${art}" \
-              -background none \
+              -background '#2B176D' \
               -gravity center \
               -extent "${canvas}x${canvas}" \
               "android/app/src/main/res/$dir/ic_launcher_foreground.png"
