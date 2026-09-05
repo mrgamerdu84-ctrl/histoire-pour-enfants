@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import PrivacyPanel from './PrivacyPanel';
+import SleepZenPanel from './SleepZenPanel';
 import './designEnhancements.css';
 import './lyricsStyles.css';
 import './launchSplash.css';
 import './copyright.css';
 import './privacy.css';
+import './sleepZen.css';
+import './polish2026.css';
 
 function RootApp() {
   const [showLaunchSplash, setShowLaunchSplash] = useState(true);
@@ -20,10 +23,11 @@ function RootApp() {
     <>
       {showLaunchSplash && (
         <div className="launchSplash" aria-label="Écran de démarrage Histoires & Comptines">
-          <img src={`${process.env.PUBLIC_URL}/branding/splash.svg`} alt="Histoires & Comptines" />
+          <img src={`${process.env.PUBLIC_URL}/branding/splash.webp`} alt="Histoires & Comptines" />
         </div>
       )}
       <App />
+      <SleepZenPanel />
       <PrivacyPanel />
     </>
   );
