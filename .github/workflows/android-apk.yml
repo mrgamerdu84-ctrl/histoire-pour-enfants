@@ -30,9 +30,9 @@ jobs:
         run: |
           set -e
           mkdir -p public/branding
-          cp branding/icon.jpg public/branding/icon.jpg
+          cp branding/icon.svg public/branding/icon.svg
           cp branding/splash.svg public/branding/splash.svg
-          test -s public/branding/icon.jpg
+          test -s public/branding/icon.svg
           test -s public/branding/splash.svg
 
       - name: Install dependencies
@@ -56,13 +56,14 @@ jobs:
         run: |
           set -e
           mkdir -p /tmp/branding
+
+          # Le JPEG était tronqué : on utilise désormais le SVG propre du même visuel.
+          rsvg-convert branding/icon.svg -w 1024 -h 1024 -o /tmp/branding/icon-clean.png
           rsvg-convert branding/splash.svg -w 1080 -h 1920 -o /tmp/branding/splash.png
-
-          # L'icône source est déjà le visuel carré exact fourni.
-          # ImageMagick tolère le flux JPEG et évite le plantage Pillow des builds précédents.
-          convert branding/icon.jpg -auto-orient -strip /tmp/branding/icon-clean.png
           test -s /tmp/branding/icon-clean.png
+          test -s /tmp/branding/splash.png
 
+          # Icônes Android classiques.
           for spec in \
             "mipmap-mdpi 48" \
             "mipmap-hdpi 72" \
@@ -75,20 +76,19 @@ jobs:
             mkdir -p "android/app/src/main/res/$dir"
             convert /tmp/branding/icon-clean.png \
               -resize "${size}x${size}" \
-              -background '#2B176D' \
               -gravity center \
               -extent "${size}x${size}" \
               "android/app/src/main/res/$dir/ic_launcher.png"
             cp "android/app/src/main/res/$dir/ic_launcher.png" "android/app/src/main/res/$dir/ic_launcher_round.png"
           done
 
-          # Icône adaptative Android : le dessin complet est placé dans la zone sûre.
+          # Android 8+ : même visuel complet placé dans la zone sûre de l’icône adaptative.
           for spec in \
-            "mipmap-mdpi 108 72" \
-            "mipmap-hdpi 162 108" \
-            "mipmap-xhdpi 216 144" \
-            "mipmap-xxhdpi 324 216" \
-            "mipmap-xxxhdpi 432 288"; do
+            "mipmap-mdpi 108 64" \
+            "mipmap-hdpi 162 96" \
+            "mipmap-xhdpi 216 128" \
+            "mipmap-xxhdpi 324 192" \
+            "mipmap-xxxhdpi 432 256"; do
             set -- $spec
             dir="$1"
             canvas="$2"
@@ -96,7 +96,7 @@ jobs:
             mkdir -p "android/app/src/main/res/$dir"
             convert /tmp/branding/icon-clean.png \
               -resize "${art}x${art}" \
-              -background '#2B176D' \
+              -background none \
               -gravity center \
               -extent "${canvas}x${canvas}" \
               "android/app/src/main/res/$dir/ic_launcher_foreground.png"
