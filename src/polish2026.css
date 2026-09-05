@@ -1,0 +1,187 @@
+:root {
+  --dream-navy: #111953;
+  --dream-purple: #5e3fa7;
+  --dream-lilac: #ab86e8;
+  --dream-gold: #ffd768;
+}
+
+.app {
+  background:
+    radial-gradient(circle at 15% 5%, rgba(170,132,235,.20), transparent 28%),
+    radial-gradient(circle at 85% 16%, rgba(255,215,104,.12), transparent 22%),
+    linear-gradient(180deg, #f7f5ff 0%, #fdfbff 45%, #f6f2ff 100%);
+}
+
+.app--night {
+  background:
+    radial-gradient(circle at 16% 8%, rgba(130,94,218,.34), transparent 30%),
+    radial-gradient(circle at 84% 12%, rgba(255,215,104,.11), transparent 25%),
+    linear-gradient(180deg, #0a123f 0%, #14104b 48%, #211150 100%);
+}
+
+.shell {
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 26px 75px rgba(45,34,95,.12);
+}
+
+.topbar {
+  backdrop-filter: blur(18px);
+  background: color-mix(in srgb, var(--surface, #fff) 88%, transparent);
+  border-bottom: 1px solid rgba(103,72,161,.08);
+}
+
+.brand {
+  font-weight: 900;
+  letter-spacing: -.025em;
+}
+
+.brandMark {
+  background: linear-gradient(135deg, #6e4cc4, #a976e6);
+  box-shadow: 0 8px 18px rgba(92,61,167,.28);
+}
+
+.coverView {
+  position: relative;
+  isolation: isolate;
+}
+
+.coverView::before {
+  content: "";
+  position: absolute;
+  width: 330px;
+  height: 330px;
+  left: 50%;
+  top: 88px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,215,104,.18), rgba(135,102,218,.12) 46%, transparent 72%);
+  filter: blur(8px);
+  z-index: -1;
+}
+
+.heroBadge {
+  background: linear-gradient(135deg, rgba(96,66,174,.10), rgba(255,214,104,.13));
+  border: 1px solid rgba(108,73,185,.13);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+}
+
+.heroIcon {
+  width: 126px !important;
+  height: 126px !important;
+  margin: 10px auto 16px !important;
+  border-radius: 30px !important;
+  font-size: 0 !important;
+  background-image: url('/branding/icon.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  box-shadow: 0 22px 42px rgba(57,38,121,.25), 0 0 0 1px rgba(255,255,255,.35) inset !important;
+  animation: dreamFloat 5.5s ease-in-out infinite;
+}
+
+@keyframes dreamFloat {
+  0%,100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-7px) rotate(1deg); }
+}
+
+.coverView h1 {
+  background: linear-gradient(135deg, #32266d, #7048af 55%, #9b5ec0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -.04em;
+}
+
+.app--night .coverView h1 {
+  background: linear-gradient(135deg, #ffffff, #e5dcff 60%, #f5d67c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.choiceGrid { gap: 14px; }
+
+.choiceCard {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(90,66,150,.10) !important;
+  border-radius: 22px !important;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  box-shadow: 0 14px 34px rgba(55,39,110,.08);
+}
+
+.choiceCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0 42%, rgba(255,255,255,.35) 50%, transparent 58%);
+  transform: translateX(-120%);
+  transition: transform .7s ease;
+  pointer-events: none;
+}
+
+.choiceCard:active { transform: scale(.99); }
+.choiceCard:hover::after { transform: translateX(120%); }
+.choiceCard--stories { background: linear-gradient(135deg, #fffdf9, #f3ecff) !important; }
+.choiceCard--songs { background: linear-gradient(135deg, #fffafc, #fff3e6) !important; }
+
+.choiceIcon {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 17px !important;
+  box-shadow: 0 10px 22px rgba(80,50,140,.13);
+}
+
+.featureRow {
+  border-radius: 18px;
+  padding: 12px 14px;
+  background: rgba(107,76,174,.055);
+  border: 1px solid rgba(107,76,174,.08);
+}
+
+.pickerStrip {
+  scroll-snap-type: x proximity;
+  padding-bottom: 8px;
+}
+
+.pickerCard {
+  scroll-snap-align: start;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 26px rgba(45,33,89,.06);
+}
+
+.pickerCard--active {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--accent) 24%, transparent) !important;
+}
+
+.readerCard {
+  border-radius: 26px !important;
+  border: 1px solid color-mix(in srgb, var(--reader-accent) 16%, transparent) !important;
+  box-shadow: 0 22px 60px rgba(50,37,102,.11) !important;
+}
+
+.storyText {
+  border-radius: 20px !important;
+  line-height: 1.75 !important;
+}
+
+.playButton {
+  border-radius: 999px !important;
+  box-shadow: 0 13px 28px color-mix(in srgb, var(--reader-accent) 24%, transparent);
+}
+
+.ambiencePanel {
+  border-radius: 22px !important;
+  background: linear-gradient(135deg, rgba(93,69,159,.07), rgba(255,214,105,.08)) !important;
+}
+
+.musicDisc {
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--reader-accent) 24%, transparent) !important;
+}
+
+@media (max-width: 600px) {
+  .shell { border-radius: 0; box-shadow: none; }
+  .heroIcon { width: 112px !important; height: 112px !important; border-radius: 28px !important; }
+  .choiceCard { border-radius: 20px !important; }
+}
