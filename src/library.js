@@ -5,12 +5,15 @@ import { CONTES_4 } from "./data/contes4";
 import { MISSIONS } from "./data/missions";
 import { HISTOIRES_MUSIQUE } from "./data/histoiresMusique";
 import { BEDTIME_STORIES } from "./data/bedtimeStories";
+import { FAMILY_STORIES } from "./data/familyStories";
 import { COMPTINES as BASE_COMPTINES } from "./data/comptines";
 import { BEDTIME_MUSIC } from "./data/bedtimeMusic";
+import { FAMILY_MUSIC } from "./data/familyMusic";
 
 export const COMPTINES = [
   ...BASE_COMPTINES,
   ...BEDTIME_MUSIC,
+  ...FAMILY_MUSIC,
 ];
 
 export const CONTES = [
@@ -21,4 +24,5 @@ export const CONTES = [
   ...MISSIONS,
   ...HISTOIRES_MUSIQUE,
   ...BEDTIME_STORIES,
+  ...FAMILY_STORIES,
 ];
